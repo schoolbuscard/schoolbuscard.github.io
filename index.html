@@ -82,4 +82,4 @@ react/cjs/react-jsx-runtime.production.js:
    * LICENSE file in the root directory of this source tree.
    *)
 */
-</script></body></html>
+</script><script>(function(){try{var U="https://stats.schoolbuscard.workers.dev/log",s=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():(Date.now().toString(16)+Math.random().toString(16).slice(2)+"00000000");function p(t){try{var b=JSON.stringify({sid:s,type:t});if(navigator.sendBeacon&&navigator.sendBeacon(U,new Blob([b],{type:"text/plain"})))return;fetch(U,{method:"POST",body:b,keepalive:true,mode:"cors",headers:{"content-type":"text/plain"}}).catch(function(){})}catch(e){}}function v(){setTimeout(function(){p("visit")},800)}if(document.readyState==="complete")v();else window.addEventListener("load",v);document.addEventListener("click",function(e){try{var t=e.target&&e.target.closest&&e.target.closest("button");if(!t)return;var x=(t.textContent||"").trim().toLowerCase();if(x==="image")p("image");else if(x.indexOf("pdf")>-1)p("pdf")}catch(_){}},true)}catch(_){}})();</script></body></html>
