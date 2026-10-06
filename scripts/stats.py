@@ -15,9 +15,13 @@ et = now - datetime.timedelta(hours=4)
 today_start = max(base, (et.replace(hour=0, minute=0, second=0, microsecond=0) + datetime.timedelta(hours=4)))
 week_start = max(base, now - datetime.timedelta(days=7))
 end = iso(now + datetime.timedelta(days=1))
+day = lambda d: d.strftime("%Y-%m-%d")
 def total(start):
-    return int(get("stats/total", start=iso(start), end=end).get("total", 0))
-visits = total(base); today = total(today_start); week = total(week_start)
+    return int(get("stats/total", start=day(start), end=end).get("total", 0))
+bp0 = os.path.join(os.path.dirname(OUT), "baseline.json")
+_b = json.load(open(bp0)) if os.path.exists(bp0) else {}
+BT = _b.get("t", 9); BE = _b.get("e", {"download-pdf": 1})
+visits = max(0, total(base) - BT); today = max(0, total(today_start) - BT); week = max(0, total(week_start) - BT)
 browsers = get("stats/browsers", start=iso(base), end=end).get("stats", [])
 systems = get("stats/systems", start=iso(base), end=end).get("stats", [])
 bpath = os.path.join(os.path.dirname(OUT), "baseline.json")
@@ -28,8 +32,8 @@ if not os.path.exists(bpath):
 bl = json.load(open(bpath))
 browsers = [{"name": k, "count": v - bl["b"].get(k, 0)} for k, v in cur["b"].items() if v - bl["b"].get(k, 0) > 0]
 systems = [{"name": k, "count": v - bl["s"].get(k, 0)} for k, v in cur["s"].items() if v - bl["s"].get(k, 0) > 0]
-hits = get("stats/hits", start=iso(base), end=end, limit=100).get("hits", [])
-ev = {h["path"]: int(h.get("count", 0)) for h in hits if h.get("event")}
+hits = get("stats/hits", start=day(base), end=end, limit=100).get("hits", [])
+ev = {h["path"]: max(0, int(h.get("count", 0)) - BE.get(h["path"], 0)) for h in hits if h.get("event")}
 img = ev.get("download-image", 0); pdf = ev.get("download-pdf", 0); req = ev.get("color-request", 0)
 dev = {"iPhone / iPad": 0, "Android": 0, "Computer": 0, "Other": 0}
 for s in systems:
