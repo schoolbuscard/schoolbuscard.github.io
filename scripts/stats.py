@@ -20,6 +20,14 @@ def total(start):
 visits = total(base); today = total(today_start); week = total(week_start)
 browsers = get("stats/browsers", start=iso(base), end=end).get("stats", [])
 systems = get("stats/systems", start=iso(base), end=end).get("stats", [])
+bpath = os.path.join(os.path.dirname(OUT), "baseline.json")
+cur = {"b": {x["name"]: int(x["count"]) for x in browsers}, "s": {x["name"]: int(x["count"]) for x in systems}}
+if not os.path.exists(bpath):
+    os.makedirs(os.path.dirname(OUT), exist_ok=True)
+    json.dump(cur, open(bpath, "w"))
+bl = json.load(open(bpath))
+browsers = [{"name": k, "count": v - bl["b"].get(k, 0)} for k, v in cur["b"].items() if v - bl["b"].get(k, 0) > 0]
+systems = [{"name": k, "count": v - bl["s"].get(k, 0)} for k, v in cur["s"].items() if v - bl["s"].get(k, 0) > 0]
 hits = get("stats/hits", start=iso(base), end=end, limit=100).get("hits", [])
 ev = {h["path"]: int(h.get("count", 0)) for h in hits if h.get("event")}
 img = ev.get("download-image", 0); pdf = ev.get("download-pdf", 0); req = ev.get("color-request", 0)
