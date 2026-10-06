@@ -42,18 +42,19 @@ for s in systems:
     elif n == "Android": dev["Android"] += c
     elif n in ("Windows", "macOS", "Mac OS X", "Linux", "ChromeOS", "Chrome OS"): dev["Computer"] += c
     else: dev["Other"] += c
-def big(label, n): return f'<div class="b"><div class="n">{n}</div><div class="l">{html.escape(label)}</div></div>'
+def big(label, n, i=''): return f'<div class="b"><div class="n" id="{i}">{n}</div><div class="l">{html.escape(label)}</div></div>'
+LIVEJS = '\n<script>\n(function(){\nvar C="https://schoolbuscard.goatcounter.com/counter/",BT=%BT%,BE=%BE%,BD="2026-10-06";\nfunction d(n){var x=new Date(Date.now()+n*864e5);return x.toLocaleDateString("en-CA",{timeZone:"America/New_York"});}\nfunction g(p,s){return fetch(C+p+".json?start="+s+"&end="+d(2)).then(function(r){return r.json()}).then(function(j){return parseInt(String(j.count).replace(/[^0-9]/g,""),10)||0});}\nfunction set(id,n){var e=document.getElementById(id);if(e)e.textContent=Math.max(0,n);}\nvar td=d(0),wk=d(-7);\ng("TOTAL",BD).then(function(n){set("v-total",n-BT)});\ng("TOTAL",wk<BD?BD:wk).then(function(n){set("v-week",n-BT)});\ng("TOTAL",td).then(function(n){set("v-today",td==BD?n-BT:n)});\n[["download-image","v-img"],["download-pdf","v-pdf"],["color-request","v-req"]].forEach(function(a){g(encodeURIComponent(a[0]),BD).then(function(n){set(a[1],n-(BE[a[0]]||0))});});\n})();\n</script>'.replace("%BT%", str(BT)).replace("%BE%", json.dumps(BE))
 def rows(items):
     if not items: return '<p class="m">Nothing yet</p>'
     return "".join(f'<div class="r"><span>{html.escape(str(a))}</span><b>{b}</b></div>' for a, b in items)
 page = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Card maker stats</title>
 <style>body{{margin:0;background:#faf9f7;color:#231f20;font:17px/1.4 -apple-system,system-ui,sans-serif}}main{{max-width:560px;margin:0 auto;padding:20px 16px 40px}}h1{{font-size:22px;margin:0 0 4px}}h2{{font-size:15px;text-transform:uppercase;letter-spacing:.05em;opacity:.7;margin:28px 0 8px}}.g{{display:grid;grid-template-columns:1fr 1fr;gap:10px}}.b{{background:#fff;border:1px solid #ddd;border-radius:10px;padding:14px}}.n{{font-size:40px;font-weight:800;line-height:1.1}}.l{{opacity:.7;font-size:14px}}.r{{display:flex;justify-content:space-between;background:#fff;border:1px solid #ddd;border-radius:10px;padding:12px 14px;margin-bottom:8px}}.m{{opacity:.6}}small{{opacity:.6}}</style></head><body><main>
-<h1>Bus/Van card maker</h1><small>Updated {now.astimezone(datetime.timezone(datetime.timedelta(hours=-4))).strftime("%b %-d, %-I:%M %p")} ET. Counts start Oct 6.</small>
-<h2>Visits</h2><div class="g">{big("Total visits", visits)}{big("This week", week)}{big("Today", today)}{big("Color requests", req)}</div>
-<h2>Downloads</h2><div class="g">{big("Image", img)}{big("PDF", pdf)}</div>
+<h1>Bus/Van card maker</h1><small>Visits and downloads are live. Devices and browsers update about every 30 min (last {now.astimezone(datetime.timezone(datetime.timedelta(hours=-4))).strftime("%b %-d, %-I:%M %p")} ET). Counts start Oct 6 at 11:25 AM.</small>
+<h2>Visits</h2><div class="g">{big("Total visits", visits, "v-total")}{big("This week", week, "v-week")}{big("Today", today, "v-today")}{big("Color requests", req, "v-req")}</div>
+<h2>Downloads</h2><div class="g">{big("Image", img, "v-img")}{big("PDF", pdf, "v-pdf")}</div>
 <h2>Devices</h2>{rows([(k, v) for k, v in dev.items() if v])}
 <h2>Browsers</h2>{rows([(b["name"], b["count"]) for b in browsers])}
-</main></body></html>'''
+</main>'''+LIVEJS+'''</body></html>'''
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
 open(OUT, "w").write(page)
 print("ok", visits, today, week, img, pdf, req)
